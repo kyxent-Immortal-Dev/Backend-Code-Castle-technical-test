@@ -9,57 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
-/**
- * @OA\Tag(
- *     name="Authentication",
- *     description="User authentication endpoints"
- * )
- * 
- * @OA\SecurityScheme(
- *     securityScheme="cookieAuth",
- *     type="apiKey",
- *     in="cookie",
- *     name="laravel_session",
- *     description="Session cookie for authentication"
- * )
- */
 class AuthController extends Controller
 {
-    /**
-     * @OA\Post(
-     *     path="/register",
-     *     summary="Register a new user",
-     *     description="Create a new user account with role assignment. User is automatically logged in.",
-     *     tags={"Authentication"},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/RegisterRequest")
-     *     ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="User registered successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 @OA\Property(property="user", ref="#/components/schemas/User")
-     *             ),
-     *             @OA\Property(property="message", type="string", example="User registered successfully")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation errors",
-     *         @OA\JsonContent(ref="#/components/schemas/ValidationErrorResponse")
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Server error",
-     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
-     *     )
-     * )
-     */
     public function register(Request $request): JsonResponse
     {
         try {
@@ -109,49 +60,6 @@ class AuthController extends Controller
         }
     }
 
-    /**
-     * @OA\Post(
-     *     path="/login",
-     *     summary="Login user",
-     *     description="Authenticate user and create session",
-     *     tags={"Authentication"},
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/LoginRequest")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Login successful",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 @OA\Property(property="user", ref="#/components/schemas/User")
-     *             ),
-     *             @OA\Property(property="message", type="string", example="Login successful")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Invalid credentials or account deactivated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Invalid credentials")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation errors",
-     *         @OA\JsonContent(ref="#/components/schemas/ValidationErrorResponse")
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Server error",
-     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
-     *     )
-     * )
-     */
     public function login(Request $request): JsonResponse
     {
         try {
@@ -202,36 +110,6 @@ class AuthController extends Controller
         }
     }
 
-    /**
-     * @OA\Post(
-     *     path="/logout",
-     *     summary="Logout user",
-     *     description="Logout user and invalidate session",
-     *     tags={"Authentication"},
-     *     security={{"cookieAuth": {}}},
-     *     @OA\Response(
-     *         response=200,
-     *         description="Logout successful",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="message", type="string", example="Logout successful")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Unauthenticated")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Server error",
-     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
-     *     )
-     * )
-     */
     public function logout(Request $request): JsonResponse
     {
         try {
@@ -252,37 +130,6 @@ class AuthController extends Controller
         }
     }
 
-    /**
-     * @OA\Get(
-     *     path="/profile",
-     *     summary="Get user profile",
-     *     description="Get authenticated user's profile information",
-     *     tags={"Authentication"},
-     *     security={{"cookieAuth": {}}},
-     *     @OA\Response(
-     *         response=200,
-     *         description="Profile retrieved successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(property="data", ref="#/components/schemas/User"),
-     *             @OA\Property(property="message", type="string", example="Profile retrieved successfully")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Unauthenticated")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Server error",
-     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
-     *     )
-     * )
-     */
     public function profile(Request $request): JsonResponse
     {
         try {
@@ -302,41 +149,6 @@ class AuthController extends Controller
         }
     }
 
-    /**
-     * @OA\Post(
-     *     path="/refresh",
-     *     summary="Refresh session",
-     *     description="Regenerate session ID for security",
-     *     tags={"Authentication"},
-     *     security={{"cookieAuth": {}}},
-     *     @OA\Response(
-     *         response=200,
-     *         description="Session refreshed successfully",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=true),
-     *             @OA\Property(
-     *                 property="data",
-     *                 type="object",
-     *                 @OA\Property(property="user", ref="#/components/schemas/User")
-     *             ),
-     *             @OA\Property(property="message", type="string", example="Session refreshed successfully")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="success", type="boolean", example=false),
-     *             @OA\Property(property="message", type="string", example="Unauthenticated")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=500,
-     *         description="Server error",
-     *         @OA\JsonContent(ref="#/components/schemas/ErrorResponse")
-     *     )
-     * )
-     */
     public function refresh(Request $request): JsonResponse
     {
         try {

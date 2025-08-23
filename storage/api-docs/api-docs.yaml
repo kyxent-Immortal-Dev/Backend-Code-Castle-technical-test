@@ -1,0 +1,709 @@
+openapi: 3.0.3
+info:
+  title: System Inventory API
+  description: "Complete API for user management with authentication and role-based access control. This API provides endpoints for user registration, authentication, and comprehensive user management with admin and vendedor roles."
+  version: 1.0.0
+  contact:
+    email: "admin@system.com"
+    name: System Administrator
+    url: "https://github.com/your-repo"
+  license:
+    name: MIT
+    url: "https://opensource.org/licenses/MIT"
+servers:
+  -
+    url: "http://localhost:8000/api"
+    description: Local Development Server
+  -
+    url: "https://your-production-domain.com/api"
+    description: Production Server
+paths:
+  /register:
+    post:
+      tags:
+        - Authentication
+      summary: Register a new user
+      description: Create a new user account with role assignment. User is automatically logged in.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        201:
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        422:
+          description: Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /login:
+    post:
+      tags:
+        - Authentication
+      summary: Login user
+      description: Authenticate user and create session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        422:
+          description: Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /profile:
+    get:
+      tags:
+        - Authentication
+      summary: Get user profile
+      description: Get authenticated user's profile information
+      security:
+        -
+          cookieAuth: []
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /logout:
+    post:
+      tags:
+        - Authentication
+      summary: Logout user
+      description: Logout user and invalidate session
+      security:
+        -
+          cookieAuth: []
+      requestBody: null
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        422:
+          description: Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh session
+      description: Regenerate session ID for security
+      security:
+        -
+          cookieAuth: []
+      requestBody: null
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        422:
+          description: Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /users:
+    get:
+      tags:
+        - Users
+      summary: Get all users
+      description: Retrieve list of all users with optional filtering and pagination
+      security:
+        -
+          cookieAuth: []
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        403:
+          description: Access denied. Admin role required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        404:
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      tags:
+        - Users
+      summary: Create new user
+      description: Create a new user account (Admin only)
+      security:
+        -
+          cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateUserRequest"
+      responses:
+        201:
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        403:
+          description: Access denied. Admin role required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        422:
+          description: Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /users/{user}:
+    get:
+      tags:
+        - Users
+      summary: Get all users
+      description: Retrieve list of all users with optional filtering and pagination
+      security:
+        -
+          cookieAuth: []
+      parameters:
+        -
+          name: user
+          in: path
+          description: User identifier
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        403:
+          description: Access denied. Admin role required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        404:
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      tags:
+        - Users
+      summary: Update user
+      description: Update existing user (Admin only)
+      security:
+        -
+          cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserRequest"
+      parameters:
+        -
+          name: user
+          in: path
+          description: User identifier
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        403:
+          description: Access denied. Admin role required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        404:
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        422:
+          description: Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+        - Users
+      summary: Delete user
+      description: Delete user account (Admin only)
+      security:
+        -
+          cookieAuth: []
+      parameters:
+        -
+          name: user
+          in: path
+          description: User identifier
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        403:
+          description: Access denied. Admin role required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        404:
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /users/{id}/toggle-status:
+    patch:
+      tags:
+        - Users
+      summary: Toggle user status
+      description: Toggle user active/inactive status (Admin only)
+      security:
+        -
+          cookieAuth: []
+      requestBody: null
+      parameters:
+        -
+          name: id
+          in: path
+          description: Id identifier
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        403:
+          description: Access denied. Admin role required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        404:
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: laravel_session
+      description: Session cookie for authentication
+  schemas:
+    User:
+      type: object
+      required:
+        - id
+        - name
+        - email
+        - role
+        - is_active
+      properties:
+        id:
+          type: integer
+          example: 1
+          description: Unique identifier for the user
+        name:
+          type: string
+          example: John Doe
+          description: Full name of the user
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+          description: Unique email address
+        role:
+          type: string
+          enum:
+            - admin
+            - vendedor
+          example: admin
+          description: User role in the system
+        is_active:
+          type: boolean
+          example: true
+          description: Whether the user account is active
+        email_verified_at:
+          type: string
+          format: "date-time"
+          nullable: true
+          description: Email verification timestamp
+        created_at:
+          type: string
+          format: "date-time"
+          description: Account creation timestamp
+        updated_at:
+          type: string
+          format: "date-time"
+          description: Last update timestamp
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+          example: "admin@system.com"
+          description: User's email address
+        password:
+          type: string
+          example: password123
+          description: User's password (minimum 8 characters)
+    RegisterRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - password_confirmation
+      properties:
+        name:
+          type: string
+          example: John Doe
+          description: Full name of the user
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+          description: Unique email address
+        password:
+          type: string
+          minLength: 8
+          example: password123
+          description: Password (minimum 8 characters)
+        password_confirmation:
+          type: string
+          example: password123
+          description: Password confirmation (must match password)
+        role:
+          type: string
+          enum:
+            - admin
+            - vendedor
+          example: vendedor
+          description: User role (defaults to vendedor if not specified)
+    CreateUserRequest:
+      type: object
+      required:
+        - name
+        - email
+        - password
+        - role
+      properties:
+        name:
+          type: string
+          example: New User
+          description: Full name of the user
+        email:
+          type: string
+          format: email
+          example: "newuser@example.com"
+          description: Unique email address
+        password:
+          type: string
+          minLength: 8
+          example: password123
+          description: Password (minimum 8 characters)
+        role:
+          type: string
+          enum:
+            - admin
+            - vendedor
+          example: vendedor
+          description: User role in the system
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Updated Name
+          description: Full name of the user
+        email:
+          type: string
+          format: email
+          example: "updated@example.com"
+          description: Unique email address
+        password:
+          type: string
+          minLength: 8
+          example: newpassword123
+          description: New password (minimum 8 characters)
+        role:
+          type: string
+          enum:
+            - admin
+            - vendedor
+          example: admin
+          description: User role in the system
+        is_active:
+          type: boolean
+          example: true
+          description: Whether the user account is active
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+          description: Indicates if the operation was successful
+        data:
+          type: object
+          description: Response data (varies by endpoint)
+        message:
+          type: string
+          example: Operation completed successfully
+          description: "Human-readable success message"
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+          description: Indicates if the operation was successful
+        message:
+          type: string
+          example: Error message
+          description: "Human-readable error message"
+        errors:
+          type: object
+          nullable: true
+          description: Detailed error information (if available)
+    ValidationErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+          description: Indicates if the operation was successful
+        message:
+          type: string
+          example: Validation errors
+          description: "Human-readable error message"
+        errors:
+          type: object
+          description: "Field-specific validation errors"
+          properties:
+            email:
+              type: array
+              items:
+                type: string
+              example:
+                - The email field is required.
+            password:
+              type: array
+              items:
+                type: string
+              example:
+                - The password must be at least 8 characters.
+tags:
+  -
+    name: Authentication
+    description: User authentication endpoints including registration, login, logout, profile management, and session refresh
+  -
+    name: Users
+    description: User management endpoints for administrators to create, read, update, delete, and manage user status
+externalDocs:
+  description: Find more info about this API
+  url: "https://github.com/your-repo"
