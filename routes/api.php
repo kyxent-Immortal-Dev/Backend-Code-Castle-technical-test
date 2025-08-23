@@ -4,7 +4,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
-// SwaggerController removed - using L5-Swagger built-in routes
 
 /*
 |--------------------------------------------------------------------------

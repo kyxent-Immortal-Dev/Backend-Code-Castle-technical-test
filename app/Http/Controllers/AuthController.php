@@ -19,8 +19,8 @@ use Illuminate\Validation\ValidationException;
  *     securityScheme="cookieAuth",
  *     type="apiKey",
  *     in="cookie",
- *     name="auth_token",
- *     description="Authentication token stored in HTTP-only cookie"
+ *     name="laravel_session",
+ *     description="Session cookie for authentication"
  * )
  */
 class AuthController extends Controller
@@ -29,7 +29,7 @@ class AuthController extends Controller
      * @OA\Post(
      *     path="/register",
      *     summary="Register a new user",
-     *     description="Create a new user account with role assignment. Authentication token is automatically set in HTTP-only cookie.",
+     *     description="Create a new user account with role assignment. User is automatically logged in.",
      *     tags={"Authentication"},
      *     @OA\RequestBody(
      *         required=true,
@@ -83,20 +83,16 @@ class AuthController extends Controller
                 'is_active' => true,
             ]);
 
-            $token = $user->createToken('auth-token')->plainTextToken;
+            // Log in the user after registration
+            Auth::login($user);
 
-            $response = response()->json([
+            return response()->json([
                 'success' => true,
                 'data' => [
                     'user' => $user,
                 ],
                 'message' => 'User registered successfully'
             ], 201);
-
-            // Set token in HTTP-only cookie
-            $response->cookie('auth_token', $token, 60 * 24 * 7, '/', null, true, true, false, 'Strict');
-
-            return $response;
 
         } catch (ValidationException $e) {
             return response()->json([
@@ -117,7 +113,7 @@ class AuthController extends Controller
      * @OA\Post(
      *     path="/login",
      *     summary="Login user",
-     *     description="Authenticate user and automatically set authentication token in HTTP-only cookie",
+     *     description="Authenticate user and create session",
      *     tags={"Authentication"},
      *     @OA\RequestBody(
      *         required=true,
@@ -180,20 +176,16 @@ class AuthController extends Controller
                 ], 401);
             }
 
-            $token = $user->createToken('auth-token')->plainTextToken;
+            // Regenerate session for security
+            $request->session()->regenerate();
 
-            $response = response()->json([
+            return response()->json([
                 'success' => true,
                 'data' => [
                     'user' => $user,
                 ],
                 'message' => 'Login successful'
             ], 200);
-
-            // Set token in HTTP-only cookie
-            $response->cookie('auth_token', $token, 60 * 24 * 7, '/', null, true, true, false, 'Strict');
-
-            return $response;
 
         } catch (ValidationException $e) {
             return response()->json([
@@ -214,9 +206,9 @@ class AuthController extends Controller
      * @OA\Post(
      *     path="/logout",
      *     summary="Logout user",
-     *     description="Revoke current access token",
+     *     description="Logout user and invalidate session",
      *     tags={"Authentication"},
-     *     security={{"bearerAuth": {}}},
+     *     security={{"cookieAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="Logout successful",
@@ -243,17 +235,14 @@ class AuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
         try {
-            $request->user()->currentAccessToken()->delete();
+            // Logout and invalidate session
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
 
-            $response = response()->json([
+            return response()->json([
                 'success' => true,
                 'message' => 'Logout successful'
             ], 200);
-
-            // Remove auth token cookie
-            $response->cookie('auth_token', '', -1, '/', null, true, true, false, 'Strict');
-
-            return $response;
 
         } catch (\Exception $e) {
             return response()->json([
@@ -269,7 +258,7 @@ class AuthController extends Controller
      *     summary="Get user profile",
      *     description="Get authenticated user's profile information",
      *     tags={"Authentication"},
-     *     security={{"bearerAuth": {}}},
+     *     security={{"cookieAuth": {}}},
      *     @OA\Response(
      *         response=200,
      *         description="Profile retrieved successfully",
@@ -316,13 +305,13 @@ class AuthController extends Controller
     /**
      * @OA\Post(
      *     path="/refresh",
-     *     summary="Refresh token",
-     *     description="Generate new access token and set it in HTTP-only cookie",
+     *     summary="Refresh session",
+     *     description="Regenerate session ID for security",
      *     tags={"Authentication"},
-     *     security={{"bearerAuth": {}}},
+     *     security={{"cookieAuth": {}}},
      *     @OA\Response(
      *         response=200,
-     *         description="Token refreshed successfully",
+     *         description="Session refreshed successfully",
      *         @OA\JsonContent(
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(
@@ -330,7 +319,7 @@ class AuthController extends Controller
      *                 type="object",
      *                 @OA\Property(property="user", ref="#/components/schemas/User")
      *             ),
-     *             @OA\Property(property="message", type="string", example="Token refreshed successfully")
+     *             @OA\Property(property="message", type="string", example="Session refreshed successfully")
      *         )
      *     ),
      *     @OA\Response(
@@ -353,29 +342,21 @@ class AuthController extends Controller
         try {
             $user = $request->user();
             
-            // Revoke current token
-            $request->user()->currentAccessToken()->delete();
-            
-            // Create new token
-            $token = $user->createToken('auth-token')->plainTextToken;
+            // Regenerate session for security
+            $request->session()->regenerate();
 
-            $response = response()->json([
+            return response()->json([
                 'success' => true,
                 'data' => [
                     'user' => $user,
                 ],
-                'message' => 'Token refreshed successfully'
+                'message' => 'Session refreshed successfully'
             ], 200);
-
-            // Set token in HTTP-only cookie
-            $response->cookie('auth_token', $token, 60 * 24 * 7, '/', null, true, true, false, 'Strict');
-
-            return $response;
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Error refreshing token: ' . $e->getMessage()
+                'message' => 'Error refreshing session: ' . $e->getMessage()
             ], 500);
         }
     }
