@@ -14,6 +14,14 @@ use Illuminate\Validation\ValidationException;
  *     name="Authentication",
  *     description="User authentication endpoints"
  * )
+ * 
+ * @OA\SecurityScheme(
+ *     securityScheme="cookieAuth",
+ *     type="apiKey",
+ *     in="cookie",
+ *     name="auth_token",
+ *     description="Authentication token stored in HTTP-only cookie"
+ * )
  */
 class AuthController extends Controller
 {
@@ -21,7 +29,7 @@ class AuthController extends Controller
      * @OA\Post(
      *     path="/register",
      *     summary="Register a new user",
-     *     description="Create a new user account with role assignment",
+     *     description="Create a new user account with role assignment. Authentication token is automatically set in HTTP-only cookie.",
      *     tags={"Authentication"},
      *     @OA\RequestBody(
      *         required=true,
@@ -35,8 +43,7 @@ class AuthController extends Controller
      *             @OA\Property(
      *                 property="data",
      *                 type="object",
-     *                 @OA\Property(property="user", ref="#/components/schemas/User"),
-     *                 @OA\Property(property="token", type="string", example="1|qyFEFKyHRknBTWV1pXgaizgtH0TVUIEOOLBLwc1n43021956")
+     *                 @OA\Property(property="user", ref="#/components/schemas/User")
      *             ),
      *             @OA\Property(property="message", type="string", example="User registered successfully")
      *         )
@@ -78,14 +85,18 @@ class AuthController extends Controller
 
             $token = $user->createToken('auth-token')->plainTextToken;
 
-            return response()->json([
+            $response = response()->json([
                 'success' => true,
                 'data' => [
                     'user' => $user,
-                    'token' => $token,
                 ],
                 'message' => 'User registered successfully'
             ], 201);
+
+            // Set token in HTTP-only cookie
+            $response->cookie('auth_token', $token, 60 * 24 * 7, '/', null, true, true, false, 'Strict');
+
+            return $response;
 
         } catch (ValidationException $e) {
             return response()->json([
@@ -106,7 +117,7 @@ class AuthController extends Controller
      * @OA\Post(
      *     path="/login",
      *     summary="Login user",
-     *     description="Authenticate user and get access token",
+     *     description="Authenticate user and automatically set authentication token in HTTP-only cookie",
      *     tags={"Authentication"},
      *     @OA\RequestBody(
      *         required=true,
@@ -120,8 +131,7 @@ class AuthController extends Controller
      *             @OA\Property(
      *                 property="data",
      *                 type="object",
-     *                 @OA\Property(property="user", ref="#/components/schemas/User"),
-     *                 @OA\Property(property="token", type="string", example="2|I2V3gJmBSMBxoN1SbQtlHmHZJfpJyrESV8xuBVskadebf0f7")
+     *                 @OA\Property(property="user", ref="#/components/schemas/User")
      *             ),
      *             @OA\Property(property="message", type="string", example="Login successful")
      *         )
@@ -172,14 +182,18 @@ class AuthController extends Controller
 
             $token = $user->createToken('auth-token')->plainTextToken;
 
-            return response()->json([
+            $response = response()->json([
                 'success' => true,
                 'data' => [
                     'user' => $user,
-                    'token' => $token,
                 ],
                 'message' => 'Login successful'
             ], 200);
+
+            // Set token in HTTP-only cookie
+            $response->cookie('auth_token', $token, 60 * 24 * 7, '/', null, true, true, false, 'Strict');
+
+            return $response;
 
         } catch (ValidationException $e) {
             return response()->json([
@@ -231,10 +245,15 @@ class AuthController extends Controller
         try {
             $request->user()->currentAccessToken()->delete();
 
-            return response()->json([
+            $response = response()->json([
                 'success' => true,
                 'message' => 'Logout successful'
             ], 200);
+
+            // Remove auth token cookie
+            $response->cookie('auth_token', '', -1, '/', null, true, true, false, 'Strict');
+
+            return $response;
 
         } catch (\Exception $e) {
             return response()->json([
@@ -298,7 +317,7 @@ class AuthController extends Controller
      * @OA\Post(
      *     path="/refresh",
      *     summary="Refresh token",
-     *     description="Generate new access token",
+     *     description="Generate new access token and set it in HTTP-only cookie",
      *     tags={"Authentication"},
      *     security={{"bearerAuth": {}}},
      *     @OA\Response(
@@ -309,8 +328,7 @@ class AuthController extends Controller
      *             @OA\Property(
      *                 property="data",
      *                 type="object",
-     *                 @OA\Property(property="user", ref="#/components/schemas/User"),
-     *                 @OA\Property(property="token", type="string", example="3|newTokenHere...")
+     *                 @OA\Property(property="user", ref="#/components/schemas/User")
      *             ),
      *             @OA\Property(property="message", type="string", example="Token refreshed successfully")
      *         )
@@ -341,14 +359,18 @@ class AuthController extends Controller
             // Create new token
             $token = $user->createToken('auth-token')->plainTextToken;
 
-            return response()->json([
+            $response = response()->json([
                 'success' => true,
                 'data' => [
                     'user' => $user,
-                    'token' => $token,
                 ],
                 'message' => 'Token refreshed successfully'
             ], 200);
+
+            // Set token in HTTP-only cookie
+            $response->cookie('auth_token', $token, 60 * 24 * 7, '/', null, true, true, false, 'Strict');
+
+            return $response;
 
         } catch (\Exception $e) {
             return response()->json([

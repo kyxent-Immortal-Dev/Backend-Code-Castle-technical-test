@@ -31,7 +31,7 @@
                     "Authentication"
                 ],
                 "summary": "Register a new user",
-                "description": "Create a new user account with role assignment",
+                "description": "Create a new user account with role assignment. Authentication token is automatically set in HTTP-only cookie.",
                 "operationId": "0903f2e0df1a8857bee538fc055417f0",
                 "requestBody": {
                     "required": true,
@@ -58,10 +58,6 @@
                                             "properties": {
                                                 "user": {
                                                     "$ref": "#/components/schemas/User"
-                                                },
-                                                "token": {
-                                                    "type": "string",
-                                                    "example": "1|qyFEFKyHRknBTWV1pXgaizgtH0TVUIEOOLBLwc1n43021956"
                                                 }
                                             },
                                             "type": "object"
@@ -105,7 +101,7 @@
                     "Authentication"
                 ],
                 "summary": "Login user",
-                "description": "Authenticate user and get access token",
+                "description": "Authenticate user and automatically set authentication token in HTTP-only cookie",
                 "operationId": "2dd578ff7aba2721293dac66833b27d1",
                 "requestBody": {
                     "required": true,
@@ -132,10 +128,6 @@
                                             "properties": {
                                                 "user": {
                                                     "$ref": "#/components/schemas/User"
-                                                },
-                                                "token": {
-                                                    "type": "string",
-                                                    "example": "2|I2V3gJmBSMBxoN1SbQtlHmHZJfpJyrESV8xuBVskadebf0f7"
                                                 }
                                             },
                                             "type": "object"
@@ -336,7 +328,7 @@
                     "Authentication"
                 ],
                 "summary": "Refresh token",
-                "description": "Generate new access token",
+                "description": "Generate new access token and set it in HTTP-only cookie",
                 "operationId": "0c3ea3c61aed881016646810460499e9",
                 "responses": {
                     "200": {
@@ -353,10 +345,6 @@
                                             "properties": {
                                                 "user": {
                                                     "$ref": "#/components/schemas/User"
-                                                },
-                                                "token": {
-                                                    "type": "string",
-                                                    "example": "3|newTokenHere..."
                                                 }
                                             },
                                             "type": "object"
@@ -1491,6 +1479,12 @@
             }
         },
         "securitySchemes": {
+            "cookieAuth": {
+                "type": "apiKey",
+                "description": "Authentication token stored in HTTP-only cookie",
+                "name": "auth_token",
+                "in": "cookie"
+            },
             "bearerAuth": {
                 "type": "http",
                 "description": "Enter the token with the `Bearer ` prefix, e.g. `Bearer abcde12345`",
