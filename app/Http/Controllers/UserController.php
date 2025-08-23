@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\UserRepository;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\SearchUserRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
-use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -17,7 +19,7 @@ class UserController extends Controller
         $this->userRepository = $userRepository;
     }
 
-    public function index(Request $request): JsonResponse
+    public function index(SearchUserRequest $request): JsonResponse
     {
         try {
             // If there are search filters
@@ -48,30 +50,16 @@ class UserController extends Controller
         }
     }
 
-    public function store(Request $request): JsonResponse
+    public function store(StoreUserRequest $request): JsonResponse
     {
         try {
-            $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:8',
-                'role' => 'required|in:admin,vendedor',
-            ]);
-
-            $user = $this->userRepository->create($validated);
+            $user = $this->userRepository->create($request->validated());
 
             return response()->json([
                 'success' => true,
                 'data' => $user,
                 'message' => 'User created successfully'
             ], 201);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation errors',
-                'errors' => $e->errors()
-            ], 422);
 
         } catch (\Exception $e) {
             return response()->json([
@@ -107,7 +95,7 @@ class UserController extends Controller
         }
     }
 
-    public function update(Request $request, $id): JsonResponse
+    public function update(UpdateUserRequest $request, $id): JsonResponse
     {
         try {
             $user = $this->userRepository->find($id);
@@ -119,22 +107,7 @@ class UserController extends Controller
                 ], 404);
             }
 
-            $validated = $request->validate([
-                'name' => 'sometimes|required|string|max:255',
-                'email' => [
-                    'sometimes',
-                    'required',
-                    'string',
-                    'email',
-                    'max:255',
-                    Rule::unique('users')->ignore($id)
-                ],
-                'password' => 'sometimes|required|string|min:8',
-                'role' => 'sometimes|required|in:admin,vendedor',
-                'is_active' => 'sometimes|boolean',
-            ]);
-
-            $updated = $this->userRepository->update($id, $validated);
+            $updated = $this->userRepository->update($id, $request->validated());
 
             if (!$updated) {
                 return response()->json([
@@ -150,13 +123,6 @@ class UserController extends Controller
                 'data' => $updatedUser,
                 'message' => 'User updated successfully'
             ], 200);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation errors',
-                'errors' => $e->errors()
-            ], 422);
 
         } catch (\Exception $e) {
             return response()->json([

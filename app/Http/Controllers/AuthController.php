@@ -3,23 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Http\Requests\RegisterUserRequest;
+use App\Http\Requests\LoginUserRequest;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    public function register(Request $request): JsonResponse
+    public function register(RegisterUserRequest $request): JsonResponse
     {
         try {
-            $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:8|confirmed',
-                'role' => 'sometimes|in:admin,vendedor',
-            ]);
+            $validated = $request->validated();
 
             // Set default role if not provided
             if (!isset($validated['role'])) {
@@ -45,13 +41,6 @@ class AuthController extends Controller
                 'message' => 'User registered successfully'
             ], 201);
 
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation errors',
-                'errors' => $e->errors()
-            ], 422);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -60,13 +49,10 @@ class AuthController extends Controller
         }
     }
 
-    public function login(Request $request): JsonResponse
+    public function login(LoginUserRequest $request): JsonResponse
     {
         try {
-            $validated = $request->validate([
-                'email' => 'required|string|email',
-                'password' => 'required|string',
-            ]);
+            $validated = $request->validated();
 
             if (!Auth::attempt($validated)) {
                 return response()->json([
@@ -94,13 +80,6 @@ class AuthController extends Controller
                 ],
                 'message' => 'Login successful'
             ], 200);
-
-        } catch (ValidationException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Validation errors',
-                'errors' => $e->errors()
-            ], 422);
 
         } catch (\Exception $e) {
             return response()->json([

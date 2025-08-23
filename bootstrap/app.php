@@ -15,6 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\CheckRole::class,
             'auth.errors' => \App\Http\Middleware\HandleAuthenticationErrors::class,
+            'admin' => \App\Http\Middleware\AdminMiddleware::class,
+            'auth' => \App\Http\Middleware\AuthenticatedMiddleware::class,
         ]);
         
         // Enable CORS for API routes
