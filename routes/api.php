@@ -7,6 +7,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\PurchaseController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\SaleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,6 +64,24 @@ Route::middleware(['auth:sanctum', 'auth.errors'])->group(function () {
         Route::put('/purchases/{purchase}', [PurchaseController::class, 'update']);
         Route::patch('/purchases/{purchase}/complete', [PurchaseController::class, 'complete']);
         Route::patch('/purchases/{purchase}/cancel', [PurchaseController::class, 'cancel']);
+        
+        // Clients management
+        Route::apiResource('clients', ClientController::class);
+        Route::patch('/clients/{client}/toggle-status', [ClientController::class, 'toggleStatus']);
+        Route::get('/clients/active', [ClientController::class, 'active']);
+        Route::get('/clients/search', [ClientController::class, 'search']);
+        Route::get('/clients/stats', [ClientController::class, 'stats']);
+        
+        // Sales management
+        Route::get('/sales/stats', [SaleController::class, 'stats']);
+        Route::get('/sales/status/{status}', [SaleController::class, 'byStatus']);
+        Route::get('/sales/client/{clientId}', [SaleController::class, 'byClient']);
+        Route::get('/sales/user/{userId}', [SaleController::class, 'byUser']);
+        Route::get('/sales/date-range', [SaleController::class, 'byDateRange']);
+        Route::get('/sales/monthly', [SaleController::class, 'monthlyTotals']);
+        Route::get('/sales/top-products', [SaleController::class, 'topProducts']);
+        Route::apiResource('sales', SaleController::class)->except(['update', 'destroy']);
+        Route::patch('/sales/{sale}/cancel', [SaleController::class, 'cancel']);
     });
     
     // Authenticated user routes (read-only access to inventory)
@@ -77,6 +97,14 @@ Route::middleware(['auth:sanctum', 'auth.errors'])->group(function () {
         // Purchases - read access only
         Route::get('/purchases', [PurchaseController::class, 'index']);
         Route::get('/purchases/{purchase}', [PurchaseController::class, 'show']);
+        
+        // Clients - read access only
+        Route::get('/clients', [ClientController::class, 'index']);
+        Route::get('/clients/{client}', [ClientController::class, 'show']);
+        
+        // Sales - read access only
+        Route::get('/sales', [SaleController::class, 'index']);
+        Route::get('/sales/{sale}', [SaleController::class, 'show']);
     });
     
     // Vendedor routes (if needed in the future)

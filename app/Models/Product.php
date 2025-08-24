@@ -120,6 +120,11 @@ class Product extends Model
         return $this->save();
     }
 
+    public function saleDetails(): HasMany
+{
+    return $this->hasMany(SaleDetail::class);
+}
+
     /**
      * Obtiene el valor total del inventario para este producto.
      */
