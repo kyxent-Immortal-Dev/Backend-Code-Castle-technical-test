@@ -3,19 +3,20 @@ builder = "NIXPACKS"
 
 [build.nixpacksConfig]
 php = "8.4"
-node = "20"
 
 [build.nixpacksConfig.variables]
 APP_ENV = "production"
-NODE_ENV = "production"
+COMPOSER_ALLOW_SUPERUSER = "1"
+PHP_VERSION = "8.4"
+NIXPACKS_NO_DEFAULT_CACHE_DIRECTORIES = "1"
 
 [deploy]
 startCommand = "php artisan serve --host=0.0.0.0 --port=$PORT"
 restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10
+restartPolicyMaxRetries = 3
 
 [deploy.healthcheck]
-path = "/api/health"
+path = "/"
 interval = "30s"
 timeout = "10s"
-retries = 3 
+retries = 3
