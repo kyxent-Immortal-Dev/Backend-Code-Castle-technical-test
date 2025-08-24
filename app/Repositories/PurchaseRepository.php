@@ -89,7 +89,8 @@ class PurchaseRepository
 
     /**
      * Crea una nueva compra con sus detalles.
-     * IMPORTANTE: Al registrar una compra, el stock del producto aumenta inmediatamente.
+     * IMPORTANTE: Al crear una compra, el status es PENDING y NO se actualiza el stock.
+     * El stock solo se actualiza cuando la compra se marca como COMPLETED.
      */
     public function create(array $data): Purchase
     {
@@ -100,11 +101,11 @@ class PurchaseRepository
                 'user_id' => $data['user_id'],
                 'purchase_date' => $data['purchase_date'],
                 'notes' => $data['notes'] ?? null,
-                'status' => Purchase::STATUS_COMPLETED, // Cambiar a completada por defecto
+                'status' => Purchase::STATUS_PENDING, // Cambiar a PENDING por defecto
                 'total_amount' => 0, // Se calculará después
             ]);
 
-            // Crear los detalles de la compra y ACTUALIZAR EL STOCK INMEDIATAMENTE
+            // Crear los detalles de la compra (SIN ACTUALIZAR STOCK)
             $totalAmount = 0;
             foreach ($data['details'] as $detailData) {
                 $detail = PurchaseDetail::create([
@@ -112,18 +113,8 @@ class PurchaseRepository
                     'product_id' => $detailData['product_id'],
                     'quantity' => $detailData['quantity'],
                     'purchase_price' => $detailData['purchase_price'],
+                    'subtotal' => $detailData['quantity'] * $detailData['purchase_price'],
                 ]);
-
-                // 🔥 ACTUALIZAR EL STOCK DEL PRODUCTO INMEDIATAMENTE
-                $product = Product::find($detailData['product_id']);
-                if ($product) {
-                    $oldStock = $product->stock;
-                    $product->increaseStock($detailData['quantity']);
-                    $newStock = $product->stock;
-                    
-                    // Log para debugging (puedes comentar estas líneas en producción)
-                    Log::info("Stock actualizado para producto {$product->name}: {$oldStock} → {$newStock} (+{$detailData['quantity']})");
-                }
 
                 $totalAmount += $detail->subtotal;
             }
@@ -140,18 +131,45 @@ class PurchaseRepository
      */
     public function update(int $id, array $data): bool
     {
-        $purchase = $this->find($id);
-        
-        if (!$purchase) {
-            return false;
-        }
+        return DB::transaction(function () use ($id, $data) {
+            $purchase = $this->find($id);
+            
+            if (!$purchase) {
+                return false;
+            }
 
-        // Solo se pueden actualizar compras pendientes
-        if (!$purchase->isPending()) {
-            return false;
-        }
+            // Solo se pueden actualizar compras pendientes
+            if (!$purchase->isPending()) {
+                return false;
+            }
 
-        return $purchase->update($data);
+            // Actualizar la compra principal
+            $purchase->update([
+                'supplier_id' => $data['supplier_id'],
+                'user_id' => $data['user_id'],
+                'purchase_date' => $data['purchase_date'],
+                'total_amount' => $data['total_amount'],
+                'status' => $data['status'],
+                'notes' => $data['notes'] ?? null,
+            ]);
+
+            // Eliminar detalles existentes
+            $purchase->details()->delete();
+
+            // Crear nuevos detalles
+            if (isset($data['details']) && is_array($data['details'])) {
+                foreach ($data['details'] as $detailData) {
+                    $purchase->details()->create([
+                        'product_id' => $detailData['product_id'],
+                        'quantity' => $detailData['quantity'],
+                        'purchase_price' => $detailData['purchase_price'],
+                        'subtotal' => $detailData['quantity'] * $detailData['purchase_price'],
+                    ]);
+                }
+            }
+
+            return true;
+        });
     }
 
     /**
@@ -181,7 +199,7 @@ class PurchaseRepository
 
     /**
      * Marca una compra como completada.
-     * NOTA: El stock ya se actualizó al crear la compra.
+     * IMPORTANTE: Al completar la compra, se actualiza el stock de los productos.
      */
     public function completePurchase(int $id): bool
     {
@@ -191,8 +209,23 @@ class PurchaseRepository
             return false;
         }
 
-        // Marcar la compra como completada (el stock ya está actualizado)
-        return $purchase->markAsCompleted();
+        return DB::transaction(function () use ($purchase) {
+            // Actualizar el stock de todos los productos de la compra
+            foreach ($purchase->details as $detail) {
+                $product = Product::find($detail->product_id);
+                if ($product) {
+                    $oldStock = $product->stock;
+                    $product->increaseStock($detail->quantity);
+                    $newStock = $product->stock;
+                    
+                    // Log para debugging (puedes comentar estas líneas en producción)
+                    Log::info("Stock actualizado para producto {$product->name}: {$oldStock} → {$newStock} (+{$detail->quantity})");
+                }
+            }
+
+            // Marcar la compra como completada
+            return $purchase->markAsCompleted();
+        });
     }
 
     /**
@@ -258,16 +291,58 @@ class PurchaseRepository
      */
     public function getPurchaseStats(): array
     {
-        return [
-            'total_purchases' => Purchase::count(),
-            'pending_purchases' => Purchase::pending()->count(),
-            'completed_purchases' => Purchase::completed()->count(),
-            'cancelled_purchases' => Purchase::cancelled()->count(),
-            'total_amount' => (float) Purchase::sum('total_amount'),
-            'average_amount' => (float) Purchase::avg('total_amount'),
-            'this_month_purchases' => Purchase::whereMonth('purchase_date', now()->month)->count(),
-            'this_month_amount' => (float) Purchase::whereMonth('purchase_date', now()->month)->sum('total_amount'),
-        ];
+        try {
+            // Basic counts
+            $totalPurchases = Purchase::count();
+            
+            // Status counts using where clauses instead of scopes
+            $pendingPurchases = Purchase::where('status', 'pending')->count();
+            $completedPurchases = Purchase::where('status', 'completed')->count();
+            $cancelledPurchases = Purchase::where('status', 'cancelled')->count();
+            
+            // Amount calculations
+            $totalAmount = Purchase::sum('total_amount') ?? 0;
+            $averageAmount = $totalPurchases > 0 ? ($totalAmount / $totalPurchases) : 0;
+            
+            // Current month stats
+            $currentMonth = now()->month;
+            $currentYear = now()->year;
+            
+            $thisMonthPurchases = Purchase::whereMonth('purchase_date', $currentMonth)
+                ->whereYear('purchase_date', $currentYear)
+                ->count();
+            
+            $thisMonthAmount = Purchase::whereMonth('purchase_date', $currentMonth)
+                ->whereYear('purchase_date', $currentYear)
+                ->sum('total_amount') ?? 0;
+
+            return [
+                'total_purchases' => $totalPurchases,
+                'pending_purchases' => $pendingPurchases,
+                'completed_purchases' => $completedPurchases,
+                'cancelled_purchases' => $cancelledPurchases,
+                'total_amount' => (float) $totalAmount,
+                'average_amount' => (float) $averageAmount,
+                'this_month_purchases' => $thisMonthPurchases,
+                'this_month_amount' => (float) $thisMonthAmount,
+            ];
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            Log::error('Error getting purchase stats: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            // Return default values if there's an error
+            return [
+                'total_purchases' => 0,
+                'pending_purchases' => 0,
+                'completed_purchases' => 0,
+                'cancelled_purchases' => 0,
+                'total_amount' => 0.0,
+                'average_amount' => 0.0,
+                'this_month_purchases' => 0,
+                'this_month_amount' => 0.0,
+            ];
+        }
     }
 
     /**

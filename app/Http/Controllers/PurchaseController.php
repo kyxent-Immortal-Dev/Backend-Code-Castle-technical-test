@@ -7,6 +7,7 @@ use App\Http\Requests\StorePurchaseRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Purchase;
 
 /**
  * Controlador para el manejo de compras del sistema
@@ -73,21 +74,12 @@ class PurchaseController extends Controller
     /**
      * Muestra una compra específica.
      */
-    public function show(int $id): JsonResponse
+    public function show(Purchase $purchase): JsonResponse
     {
         try {
-            $purchase = $this->purchaseRepository->find($id);
-
-            if (!$purchase) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Compra no encontrada'
-                ], 404);
-            }
-
             return response()->json([
                 'success' => true,
-                'data' => $purchase,
+                'data' => $purchase->load(['supplier', 'user', 'details.product']),
                 'message' => 'Compra obtenida exitosamente'
             ], 200);
 
@@ -100,21 +92,53 @@ class PurchaseController extends Controller
     }
 
     /**
-     * Elimina una compra del sistema.
+     * Actualiza una compra existente.
      */
-    public function destroy(int $id): JsonResponse
+    public function update(StorePurchaseRequest $request, Purchase $purchase): JsonResponse
     {
         try {
-            $purchase = $this->purchaseRepository->find($id);
-
-            if (!$purchase) {
+            // Verificar que la compra esté pendiente
+            if (!$purchase->isPending()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Compra no encontrada'
-                ], 404);
+                    'message' => 'Solo se pueden actualizar compras pendientes'
+                ], 400);
             }
 
-            // Solo se pueden eliminar compras pendientes
+            $data = $request->validated();
+            $updated = $this->purchaseRepository->update($purchase->id, $data);
+
+            if ($updated) {
+                // Recargar la compra con las relaciones
+                $purchase->refresh();
+                $purchase->load(['supplier', 'user', 'details.product']);
+
+                return response()->json([
+                    'success' => true,
+                    'data' => $purchase,
+                    'message' => 'Compra actualizada exitosamente'
+                ], 200);
+            }
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la compra'
+            ], 500);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar compra: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Elimina una compra.
+     */
+    public function destroy(Purchase $purchase): JsonResponse
+    {
+        try {
             if (!$purchase->isPending()) {
                 return response()->json([
                     'success' => false,
@@ -122,19 +146,19 @@ class PurchaseController extends Controller
                 ], 400);
             }
 
-            $deleted = $this->purchaseRepository->delete($id);
+            $deleted = $this->purchaseRepository->delete($purchase->id);
 
-            if (!$deleted) {
+            if ($deleted) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'No se pudo eliminar la compra'
-                ], 500);
+                    'success' => true,
+                    'message' => 'Compra eliminada exitosamente'
+                ], 200);
             }
 
             return response()->json([
-                'success' => true,
-                'message' => 'Compra eliminada exitosamente'
-            ], 200);
+                'success' => false,
+                'message' => 'Error al eliminar la compra'
+            ], 500);
 
         } catch (\Exception $e) {
             return response()->json([
@@ -145,21 +169,11 @@ class PurchaseController extends Controller
     }
 
     /**
-     * Marca una compra como completada y actualiza el stock.
+     * Marca una compra como completada.
      */
-    public function complete(int $id): JsonResponse
+    public function complete(Purchase $purchase): JsonResponse
     {
         try {
-            $purchase = $this->purchaseRepository->find($id);
-
-            if (!$purchase) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Compra no encontrada'
-                ], 404);
-            }
-
-            // Solo se pueden completar compras pendientes
             if (!$purchase->isPending()) {
                 return response()->json([
                     'success' => false,
@@ -167,22 +181,23 @@ class PurchaseController extends Controller
                 ], 400);
             }
 
-            $completed = $this->purchaseRepository->completePurchase($id);
+            $completed = $this->purchaseRepository->completePurchase($purchase->id);
 
-            if (!$completed) {
+            if ($completed) {
+                $purchase->refresh();
+                $purchase->load(['supplier', 'user', 'details.product']);
+
                 return response()->json([
-                    'success' => false,
-                    'message' => 'No se pudo completar la compra'
-                ], 500);
+                    'success' => true,
+                    'data' => $purchase,
+                    'message' => 'Compra marcada como completada exitosamente'
+                ], 200);
             }
 
-            $updatedPurchase = $this->purchaseRepository->find($id);
-
             return response()->json([
-                'success' => true,
-                'data' => $updatedPurchase,
-                'message' => 'Compra completada exitosamente. El stock de los productos ha sido actualizado.'
-            ], 200);
+                'success' => false,
+                'message' => 'Error al completar la compra'
+            ], 500);
 
         } catch (\Exception $e) {
             return response()->json([
@@ -195,19 +210,9 @@ class PurchaseController extends Controller
     /**
      * Marca una compra como cancelada.
      */
-    public function cancel(int $id): JsonResponse
+    public function cancel(Purchase $purchase): JsonResponse
     {
         try {
-            $purchase = $this->purchaseRepository->find($id);
-
-            if (!$purchase) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Compra no encontrada'
-                ], 404);
-            }
-
-            // Solo se pueden cancelar compras pendientes
             if (!$purchase->isPending()) {
                 return response()->json([
                     'success' => false,
@@ -215,22 +220,23 @@ class PurchaseController extends Controller
                 ], 400);
             }
 
-            $cancelled = $this->purchaseRepository->cancelPurchase($id);
+            $cancelled = $this->purchaseRepository->cancelPurchase($purchase->id);
 
-            if (!$cancelled) {
+            if ($cancelled) {
+                $purchase->refresh();
+                $purchase->load(['supplier', 'user', 'details.product']);
+
                 return response()->json([
-                    'success' => false,
-                    'message' => 'No se pudo cancelar la compra'
-                ], 500);
+                    'success' => true,
+                    'data' => $purchase,
+                    'message' => 'Compra marcada como cancelada exitosamente'
+                ], 200);
             }
 
-            $updatedPurchase = $this->purchaseRepository->find($id);
-
             return response()->json([
-                'success' => true,
-                'data' => $updatedPurchase,
-                'message' => 'Compra cancelada exitosamente'
-            ], 200);
+                'success' => false,
+                'message' => 'Error al cancelar la compra'
+            ], 500);
 
         } catch (\Exception $e) {
             return response()->json([
