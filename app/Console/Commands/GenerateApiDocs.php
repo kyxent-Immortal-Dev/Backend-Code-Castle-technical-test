@@ -193,7 +193,7 @@ class GenerateApiDocs extends Command
         }
         
         return [
-            'openapi' => '3.0.3',
+            'openapi' => '3.1.0',
             'info' => [
                 'title' => 'System Inventory API',
                 'description' => 'Complete API for user management with authentication and role-based access control. This API provides endpoints for user registration, authentication, and comprehensive user management with admin and vendedor roles.',

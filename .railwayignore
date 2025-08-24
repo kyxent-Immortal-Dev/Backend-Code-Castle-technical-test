@@ -44,7 +44,7 @@ Thumbs.db
 .gitignore
 
 # Documentation
-
+docs/
 README.md
 
 # Frontend (handled separately)
