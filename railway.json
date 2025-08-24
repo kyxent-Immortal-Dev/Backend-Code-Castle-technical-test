@@ -13,5 +13,17 @@
       "timeout": "10s",
       "retries": 3
     }
+  },
+  "variables": {
+    "APP_ENV": "production",
+    "APP_DEBUG": "false",
+    "LOG_LEVEL": "error",
+    "CACHE_DRIVER": "file",
+    "SESSION_DRIVER": "file",
+    "QUEUE_CONNECTION": "sync",
+    "COMPOSER_ALLOW_SUPERUSER": "1",
+    "L5_SWAGGER_USE_ABSOLUTE_PATH": "false",
+    "L5_SWAGGER_TRUST_PROXY": "true",
+    "L5_FORMAT_TO_USE_FOR_DOCS": "yaml"
   }
 } 

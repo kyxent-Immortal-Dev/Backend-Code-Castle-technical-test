@@ -18,7 +18,7 @@ return [
                 /*
                  * Edit to include full URL in ui for assets
                 */
-                'use_absolute_path' => env('L5_SWAGGER_USE_ABSOLUTE_PATH', true),
+                'use_absolute_path' => env('L5_SWAGGER_USE_ABSOLUTE_PATH', false),
 
                 /*
                  * File name of the generated json documentation file
@@ -37,9 +37,9 @@ return [
 
                 /*
                  * Use external documentation file instead of scanning
-                */
+                 */
                 'external_docs' => [
-                    'url' => storage_path('api-docs/api-docs.yaml'),
+                    'url' => '/api/docs/yaml',
                 ],
 
                 /*
@@ -145,7 +145,7 @@ return [
              * Edit to trust the proxy's ip address - needed for AWS Load Balancer
              * string[]
             */
-            'proxy' => false,
+            'proxy' => env('L5_SWAGGER_TRUST_PROXY', true),
 
             /*
              * Configs plugin allows to fetch external configs instead of passing them to SwaggerUIBundle.
@@ -183,7 +183,7 @@ return [
                     /**
                      * If set, enables filtering. The top bar will show an edit box that
                      * you can use to filter the tagged operations that are shown. Can be
-                     * Boolean to enable or disable, or a string, in which case filtering
+                     * boolean to enable or disable, or a string, in which case filtering
                      * will be enabled using that string as the filter expression. Filtering
                      * is case-sensitive matching the filter expression anywhere inside
                      * the tag.
@@ -214,7 +214,7 @@ return [
              * Constants which can be used in annotations
              */
             'constants' => [
-                'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', 'http://my-default-host.com'),
+                'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', env('APP_URL', 'http://localhost:8000')),
             ],
         ],
     ],
@@ -353,7 +353,7 @@ return [
         'generate_always' => env('L5_SWAGGER_GENERATE_ALWAYS', false),
 
         /*
-         * Set this to `true` to generate a copy of documentation in yaml format
+         * Set this to `true` to generate a copy of documentation file
         */
         'generate_yaml_copy' => env('L5_SWAGGER_GENERATE_YAML_COPY', false),
 
@@ -361,7 +361,7 @@ return [
          * Edit to trust the proxy's ip address - needed for AWS Load Balancer
          * string[]
         */
-        'proxy' => false,
+        'proxy' => env('L5_SWAGGER_TRUST_PROXY', true),
 
         /*
          * Configs plugin allows to fetch external configs instead of passing them to SwaggerUIBundle.
@@ -399,7 +399,7 @@ return [
                 /**
                  * If set, enables filtering. The top bar will show an edit box that
                  * you can use to filter the tagged operations that are shown. Can be
-                 * Boolean to enable or disable, or a string, in which case filtering
+                 * boolean to enable or disable, or a string, in which case filtering
                  * will be enabled using that string as the filter expression. Filtering
                  * is case-sensitive matching the filter expression anywhere inside
                  * the tag.
@@ -430,7 +430,7 @@ return [
          * Constants which can be used in annotations
          */
         'constants' => [
-            'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', 'http://my-default-host.com'),
+            'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', env('APP_URL', 'http://localhost:8000')),
         ],
     ],
 ];

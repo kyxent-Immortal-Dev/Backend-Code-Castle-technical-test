@@ -6,16 +6,16 @@ info:
   contact:
     email: "admin@system.com"
     name: System Administrator
-    url: "https://github.com/your-repo"
+    url: "http://localhost/api/documentation"
   license:
     name: MIT
     url: "https://opensource.org/licenses/MIT"
 servers:
   -
-    url: "http://localhost:8000/api"
+    url: "http://localhost/api"
     description: Local Development Server
   -
-    url: "https://your-production-domain.com/api"
+    url: "http://localhost/api"
     description: Production Server
 paths:
   /register:
@@ -3267,4 +3267,4 @@ tags:
     description: Sales management endpoints for administrators to create sales, manage inventory flow with automatic stock deduction, and track customer transactions
 externalDocs:
   description: Find more info about this API
-  url: "https://github.com/your-repo"
+  url: "http://localhost/api/documentation"

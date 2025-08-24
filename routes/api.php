@@ -9,12 +9,17 @@ use App\Http\Controllers\Inventary\SupplierController;
 use App\Http\Controllers\Inventary\PurchaseController;
 use App\Http\Controllers\Sales\ClientController;
 use App\Http\Controllers\Sales\SaleController;
+use App\Http\Controllers\DocumentationController;
 
 /*
 |--------------------------------------------------------------------------
 | API Routes
 |--------------------------------------------------------------------------
 */
+
+// Documentation routes (public access)
+Route::get('/docs/yaml', [DocumentationController::class, 'yaml']);
+Route::get('/docs/json', [DocumentationController::class, 'json']);
 
 // Public authentication routes
 Route::post('/register', [AuthController::class, 'register']);
