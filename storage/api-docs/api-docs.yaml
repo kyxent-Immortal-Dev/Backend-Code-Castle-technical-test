@@ -9,7 +9,7 @@ info:
   description: "Complete API for comprehensive inventory management with authentication and role-based access control. This API provides endpoints for user management, product inventory, supplier management, purchase orders, sales management with automatic stock deduction, client management, and automatic stock updates with admin and vendedor roles."
   version: 1.0.0
   contact:
-    email: "admin@system.com"
+    email: "humbertoezequiel.z.c@gmail.com"
     name: System Administrator
     url: "http://localhost/api/documentation"
   license:
@@ -20,7 +20,7 @@ servers:
     url: "http://localhost/api"
     description: Local Development Server
   -
-    url: "http://localhost/api"
+    url: "https://ezequielcampos-code-castle-prueba-tecnica-fullstack.up.railway.app/api"
     description: Production Server
 paths:
   /register:

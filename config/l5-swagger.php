@@ -18,7 +18,7 @@ return [
                 /*
                  * Edit to include full URL in ui for assets
                 */
-                'use_absolute_path' => env('L5_SWAGGER_USE_ABSOLUTE_PATH', false),
+                'use_absolute_path' => env('L5_SWAGGER_USE_ABSOLUTE_PATH', true),
 
                 /*
                  * File name of the generated json documentation file
@@ -37,9 +37,9 @@ return [
 
                 /*
                  * Use external documentation file instead of scanning
-                 */
+                */
                 'external_docs' => [
-                    'url' => '/api/docs/yaml',
+                    'url' => storage_path('api-docs/api-docs.yaml'),
                 ],
 
                 /*
@@ -145,7 +145,7 @@ return [
              * Edit to trust the proxy's ip address - needed for AWS Load Balancer
              * string[]
             */
-            'proxy' => env('L5_SWAGGER_TRUST_PROXY', true),
+            'proxy' => false,
 
             /*
              * Configs plugin allows to fetch external configs instead of passing them to SwaggerUIBundle.
@@ -183,7 +183,7 @@ return [
                     /**
                      * If set, enables filtering. The top bar will show an edit box that
                      * you can use to filter the tagged operations that are shown. Can be
-                     * boolean to enable or disable, or a string, in which case filtering
+                     * Boolean to enable or disable, or a string, in which case filtering
                      * will be enabled using that string as the filter expression. Filtering
                      * is case-sensitive matching the filter expression anywhere inside
                      * the tag.
@@ -214,17 +214,7 @@ return [
              * Constants which can be used in annotations
              */
             'constants' => [
-                'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', env('APP_URL', 'http://localhost:8000')),
-            ],
-            
-            /*
-             * Additional Swagger UI configuration to force HTTPS
-             */
-            'additional_config' => [
-                'schemes' => ['https'],
-                'host' => env('APP_URL') ? parse_url(env('APP_URL'), PHP_URL_HOST) : 'localhost',
-                'basePath' => '/api',
-                'protocols' => ['https'],
+                'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', 'http://my-default-host.com'),
             ],
         ],
     ],
@@ -363,7 +353,7 @@ return [
         'generate_always' => env('L5_SWAGGER_GENERATE_ALWAYS', false),
 
         /*
-         * Set this to `true` to generate a copy of documentation file
+         * Set this to `true` to generate a copy of documentation in yaml format
         */
         'generate_yaml_copy' => env('L5_SWAGGER_GENERATE_YAML_COPY', false),
 
@@ -371,7 +361,7 @@ return [
          * Edit to trust the proxy's ip address - needed for AWS Load Balancer
          * string[]
         */
-        'proxy' => env('L5_SWAGGER_TRUST_PROXY', true),
+        'proxy' => false,
 
         /*
          * Configs plugin allows to fetch external configs instead of passing them to SwaggerUIBundle.
@@ -407,9 +397,9 @@ return [
                 'doc_expansion' => env('L5_SWAGGER_UI_DOC_EXPANSION', 'none'),
 
                 /**
-                 * If set, enables filtering. The top bar will make an edit box that
+                 * If set, enables filtering. The top bar will show an edit box that
                  * you can use to filter the tagged operations that are shown. Can be
-                 * boolean to enable or disable, or a string, in which case filtering
+                 * Boolean to enable or disable, or a string, in which case filtering
                  * will be enabled using that string as the filter expression. Filtering
                  * is case-sensitive matching the filter expression anywhere inside
                  * the tag.
@@ -440,7 +430,7 @@ return [
          * Constants which can be used in annotations
          */
         'constants' => [
-            'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', env('APP_URL', 'http://localhost:8000')),
+            'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', 'http://my-default-host.com'),
         ],
     ],
 ];

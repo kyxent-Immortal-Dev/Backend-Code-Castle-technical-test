@@ -5,8 +5,8 @@
         "description": "Complete API for user management with authentication and role-based access control. This API provides endpoints for user registration, authentication, and comprehensive user management with admin and vendedor roles.",
         "contact": {
             "name": "System Administrator",
-            "url": "https://github.com/your-repo",
-            "email": "admin@system.com"
+            "url": "https://github.com/kyxent-Immortal-Dev/Backend-Code-Castle-technical-test",
+            "email": "humbertoezequiel.z.c@gmail.com"
         },
         "license": {
             "name": "MIT",
@@ -20,7 +20,7 @@
             "description": "Local Development Server"
         },
         {
-            "url": "https://your-production-domain.com/api",
+            "url": "https://ezequielcampos-code-castle-prueba-tecnica-fullstack.up.railway.app/api",
             "description": "Production Server"
         }
     ],

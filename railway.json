@@ -13,23 +13,5 @@
       "timeout": "10s",
       "retries": 3
     }
-  },
-  "variables": {
-    "APP_ENV": "production",
-    "APP_DEBUG": "false",
-    "LOG_LEVEL": "error",
-    "CACHE_DRIVER": "file",
-    "SESSION_DRIVER": "file",
-    "QUEUE_CONNECTION": "sync",
-    "COMPOSER_ALLOW_SUPERUSER": "1",
-    "L5_SWAGGER_USE_ABSOLUTE_PATH": "false",
-    "L5_SWAGGER_TRUST_PROXY": "true",
-    "L5_FORMAT_TO_USE_FOR_DOCS": "yaml",
-    "L5_SWAGGER_GENERATE_ALWAYS": "false",
-    "L5_SWAGGER_UI_DOC_EXPANSION": "none",
-    "L5_SWAGGER_UI_FILTERS": "true",
-    "L5_SWAGGER_UI_USE_EXAMPLE_VALUES_FOR_REQUEST": "false",
-    "L5_SWAGGER_UI_PERSIST_AUTHORIZATION": "false",
-    "L5_SWAGGER_OPERATIONS_SORT": "alpha"
   }
 } 
