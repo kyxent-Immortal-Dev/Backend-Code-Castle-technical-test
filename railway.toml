@@ -3,13 +3,10 @@ builder = "NIXPACKS"
 
 [build.nixpacksConfig]
 php = "8.4"
-node = "22"
 
 [build.nixpacksConfig.variables]
 APP_ENV = "production"
-NODE_ENV = "production"
 COMPOSER_ALLOW_SUPERUSER = "1"
-NODE_VERSION = "22"
 PHP_VERSION = "8.4"
 
 [deploy]

@@ -12,4 +12,7 @@ README.md
 tests/
 phpunit.xml
 storage/app/*
-!storage/app/public/ 
+!storage/app/public/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log* 
