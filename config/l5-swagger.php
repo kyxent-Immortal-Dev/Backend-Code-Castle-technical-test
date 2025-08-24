@@ -216,6 +216,16 @@ return [
             'constants' => [
                 'L5_SWAGGER_CONST_HOST' => env('L5_SWAGGER_CONST_HOST', env('APP_URL', 'http://localhost:8000')),
             ],
+            
+            /*
+             * Additional Swagger UI configuration to force HTTPS
+             */
+            'additional_config' => [
+                'schemes' => ['https'],
+                'host' => env('APP_URL') ? parse_url(env('APP_URL'), PHP_URL_HOST) : 'localhost',
+                'basePath' => '/api',
+                'protocols' => ['https'],
+            ],
         ],
     ],
     'defaults' => [
@@ -397,7 +407,7 @@ return [
                 'doc_expansion' => env('L5_SWAGGER_UI_DOC_EXPANSION', 'none'),
 
                 /**
-                 * If set, enables filtering. The top bar will show an edit box that
+                 * If set, enables filtering. The top bar will make an edit box that
                  * you can use to filter the tagged operations that are shown. Can be
                  * boolean to enable or disable, or a string, in which case filtering
                  * will be enabled using that string as the filter expression. Filtering
