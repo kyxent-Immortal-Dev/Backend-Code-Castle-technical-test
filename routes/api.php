@@ -2,13 +2,13 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\UserController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\SupplierController;
-use App\Http\Controllers\PurchaseController;
-use App\Http\Controllers\ClientController;
-use App\Http\Controllers\SaleController;
+use App\Http\Controllers\Users\AuthController;
+use App\Http\Controllers\Users\UserController;
+use App\Http\Controllers\Inventary\ProductController;
+use App\Http\Controllers\Inventary\SupplierController;
+use App\Http\Controllers\Inventary\PurchaseController;
+use App\Http\Controllers\Sales\ClientController;
+use App\Http\Controllers\Sales\SaleController;
 
 /*
 |--------------------------------------------------------------------------
