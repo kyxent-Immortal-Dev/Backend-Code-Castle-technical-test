@@ -59,7 +59,10 @@ return [
                  * `scanOptions.exclude` overwrites this
                 */
                 'excludes' => [
+                    // Excluir todo para usar solo archivo externo
                     base_path('app'),
+                    base_path('vendor'),
+                    base_path('storage'),
                 ],
             ],
 

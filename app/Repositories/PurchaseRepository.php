@@ -8,6 +8,7 @@ use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Repositorio para el manejo de compras del sistema
@@ -88,6 +89,7 @@ class PurchaseRepository
 
     /**
      * Crea una nueva compra con sus detalles.
+     * IMPORTANTE: Al registrar una compra, el stock del producto aumenta inmediatamente.
      */
     public function create(array $data): Purchase
     {
@@ -98,11 +100,11 @@ class PurchaseRepository
                 'user_id' => $data['user_id'],
                 'purchase_date' => $data['purchase_date'],
                 'notes' => $data['notes'] ?? null,
-                'status' => Purchase::STATUS_PENDING,
+                'status' => Purchase::STATUS_COMPLETED, // Cambiar a completada por defecto
                 'total_amount' => 0, // Se calculará después
             ]);
 
-            // Crear los detalles de la compra
+            // Crear los detalles de la compra y ACTUALIZAR EL STOCK INMEDIATAMENTE
             $totalAmount = 0;
             foreach ($data['details'] as $detailData) {
                 $detail = PurchaseDetail::create([
@@ -111,6 +113,17 @@ class PurchaseRepository
                     'quantity' => $detailData['quantity'],
                     'purchase_price' => $detailData['purchase_price'],
                 ]);
+
+                // 🔥 ACTUALIZAR EL STOCK DEL PRODUCTO INMEDIATAMENTE
+                $product = Product::find($detailData['product_id']);
+                if ($product) {
+                    $oldStock = $product->stock;
+                    $product->increaseStock($detailData['quantity']);
+                    $newStock = $product->stock;
+                    
+                    // Log para debugging (puedes comentar estas líneas en producción)
+                    Log::info("Stock actualizado para producto {$product->name}: {$oldStock} → {$newStock} (+{$detailData['quantity']})");
+                }
 
                 $totalAmount += $detail->subtotal;
             }
@@ -167,7 +180,8 @@ class PurchaseRepository
     }
 
     /**
-     * Marca una compra como completada y actualiza el stock.
+     * Marca una compra como completada.
+     * NOTA: El stock ya se actualizó al crear la compra.
      */
     public function completePurchase(int $id): bool
     {
@@ -177,18 +191,8 @@ class PurchaseRepository
             return false;
         }
 
-        return DB::transaction(function () use ($purchase) {
-            // Actualizar el stock de cada producto
-            foreach ($purchase->details as $detail) {
-                $product = Product::find($detail->product_id);
-                if ($product) {
-                    $product->increaseStock($detail->quantity);
-                }
-            }
-
-            // Marcar la compra como completada
-            return $purchase->markAsCompleted();
-        });
+        // Marcar la compra como completada (el stock ya está actualizado)
+        return $purchase->markAsCompleted();
     }
 
     /**
