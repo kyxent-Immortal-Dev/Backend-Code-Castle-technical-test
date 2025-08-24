@@ -1,0 +1,56 @@
+# Development files
+.env
+.env.local
+.env.development
+.env.testing
+.env.production
+
+# Dependencies (will be installed by Railway)
+vendor/
+node_modules/
+
+# Build artifacts
+public/build/
+public/hot/
+public/storage/
+
+# Logs
+storage/logs/
+*.log
+
+# Cache
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+bootstrap/cache/
+
+# Testing
+tests/
+phpunit.xml
+.phpunit.result.cache
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+docs/
+README.md
+
+# Frontend (handled separately)
+resources/js/
+resources/css/
+vite.config.js
+package.json
+package-lock.json
+bun.lock 
