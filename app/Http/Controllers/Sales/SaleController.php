@@ -36,7 +36,7 @@ class SaleController extends Controller
         try {
             // Agregar el usuario autenticado
             $data = $request->validated();
-            $data['user_id'] = auth()->id();
+            $data['user_id'] = $request->user()->id;
             
             $sale = $this->saleRepository->create($data);
             

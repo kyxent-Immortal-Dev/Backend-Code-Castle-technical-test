@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: System Inventory API
-  description: "Complete API for comprehensive inventory management with authentication and role-based access control. This API provides endpoints for user management, product inventory, supplier management, purchase orders, and automatic stock updates with admin and vendedor roles."
+  description: "Complete API for comprehensive inventory management with authentication and role-based access control. This API provides endpoints for user management, product inventory, supplier management, purchase orders, sales management with automatic stock deduction, client management, and automatic stock updates with admin and vendedor roles."
   version: 1.0.0
   contact:
     email: "admin@system.com"
@@ -1821,6 +1821,834 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /clients:
+    get:
+      tags:
+        - Clients
+      summary: Get all clients
+      description: Retrieve list of all clients with pagination
+      security:
+        -
+          cookieAuth: []
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      tags:
+        - Clients
+      summary: Create new client
+      description: Create a new client (Admin only)
+      security:
+        -
+          cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateClientRequest"
+      responses:
+        201:
+          description: Client created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        403:
+          description: Access denied. Admin role required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        422:
+          description: Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /clients/{id}:
+    get:
+      tags:
+        - Clients
+      summary: Get client by ID
+      description: Retrieve a specific client by its ID
+      security:
+        -
+          cookieAuth: []
+      parameters:
+        -
+          name: id
+          in: path
+          description: Client identifier
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        404:
+          description: Client not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    put:
+      tags:
+        - Clients
+      summary: Update client
+      description: Update existing client (Admin only)
+      security:
+        -
+          cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateClientRequest"
+      parameters:
+        -
+          name: id
+          in: path
+          description: Client identifier
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        403:
+          description: Access denied. Admin role required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        404:
+          description: Client not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        422:
+          description: Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      tags:
+        - Clients
+      summary: Delete client
+      description: Delete client (Admin only, only if no sales associated)
+      security:
+        -
+          cookieAuth: []
+      parameters:
+        -
+          name: id
+          in: path
+          description: Client identifier
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        403:
+          description: Access denied. Admin role required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        404:
+          description: Client not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /clients/{id}/toggle-status:
+    patch:
+      tags:
+        - Clients
+      summary: Toggle client status
+      description: Toggle client active/inactive status (Admin only)
+      security:
+        -
+          cookieAuth: []
+      requestBody: null
+      parameters:
+        -
+          name: id
+          in: path
+          description: Client identifier
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        403:
+          description: Access denied. Admin role required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        404:
+          description: Client not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /clients/active:
+    get:
+      tags:
+        - Clients
+      summary: Get active clients
+      description: Retrieve only active clients
+      security:
+        -
+          cookieAuth: []
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /clients/search:
+    get:
+      tags:
+        - Clients
+      summary: Search clients
+      description: Search clients by various criteria
+      security:
+        -
+          cookieAuth: []
+      parameters:
+        -
+          name: name
+          in: query
+          description: Client name
+          required: false
+          schema:
+            type: string
+            example: "John Doe"
+        -
+          name: email
+          in: query
+          description: Client email
+          required: false
+          schema:
+            type: string
+            example: "john@example.com"
+        -
+          name: phone
+          in: query
+          description: Client phone
+          required: false
+          schema:
+            type: string
+            example: "+1234567890"
+        -
+          name: is_active
+          in: query
+          description: Filter by active status
+          required: false
+          schema:
+            type: boolean
+            example: true
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /clients/stats:
+    get:
+      tags:
+        - Clients
+      summary: Get client statistics
+      description: Retrieve comprehensive client statistics
+      security:
+        -
+          cookieAuth: []
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /sales:
+    get:
+      tags:
+        - Sales
+      summary: Get all sales
+      description: Retrieve list of all sales with pagination
+      security:
+        -
+          cookieAuth: []
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      tags:
+        - Sales
+      summary: Create new sale
+      description: Create a new sale with automatic stock deduction (Admin only)
+      security:
+        -
+          cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateSaleRequest"
+      responses:
+        201:
+          description: Sale created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        403:
+          description: Access denied. Admin role required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        422:
+          description: Validation errors
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ValidationErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /sales/{id}:
+    get:
+      tags:
+        - Sales
+      summary: Get sale by ID
+      description: Retrieve a specific sale by its ID
+      security:
+        -
+          cookieAuth: []
+      parameters:
+        -
+          name: id
+          in: path
+          description: Sale identifier
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        404:
+          description: Sale not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /sales/{id}/cancel:
+    patch:
+      tags:
+        - Sales
+      summary: Cancel sale
+      description: Cancel sale and restore product stock (Admin only)
+      security:
+        -
+          cookieAuth: []
+      requestBody: null
+      parameters:
+        -
+          name: id
+          in: path
+          description: Sale identifier
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        403:
+          description: Access denied. Admin role required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        404:
+          description: Sale not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /sales/stats:
+    get:
+      tags:
+        - Sales
+      summary: Get sales statistics
+      description: Retrieve comprehensive sales statistics
+      security:
+        -
+          cookieAuth: []
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /sales/status/{status}:
+    get:
+      tags:
+        - Sales
+      summary: Get sales by status
+      description: Retrieve sales filtered by status
+      security:
+        -
+          cookieAuth: []
+      parameters:
+        -
+          name: status
+          in: path
+          description: Sale status
+          required: true
+          schema:
+            type: string
+            enum:
+              - active
+              - cancelled
+            example: "active"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /sales/client/{clientId}:
+    get:
+      tags:
+        - Sales
+      summary: Get sales by client
+      description: Retrieve all sales for a specific client
+      security:
+        -
+          cookieAuth: []
+      parameters:
+        -
+          name: clientId
+          in: path
+          description: Client identifier
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /sales/user/{userId}:
+    get:
+      tags:
+        - Sales
+      summary: Get sales by user
+      description: Retrieve all sales made by a specific user
+      security:
+        -
+          cookieAuth: []
+      parameters:
+        -
+          name: userId
+          in: path
+          description: User identifier
+          required: true
+          schema:
+            type: integer
+            example: 1
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /sales/date-range:
+    get:
+      tags:
+        - Sales
+      summary: Get sales by date range
+      description: Retrieve sales within a specific date range
+      security:
+        -
+          cookieAuth: []
+      parameters:
+        -
+          name: start_date
+          in: query
+          description: Start date (YYYY-MM-DD)
+          required: true
+          schema:
+            type: string
+            format: date
+            example: "2024-01-01"
+        -
+          name: end_date
+          in: query
+          description: End date (YYYY-MM-DD)
+          required: true
+          schema:
+            type: string
+            format: date
+            example: "2024-12-31"
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        400:
+          description: Bad request - dates required
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /sales/monthly:
+    get:
+      tags:
+        - Sales
+      summary: Get monthly sales totals
+      description: Retrieve monthly sales totals for a specific year
+      security:
+        -
+          cookieAuth: []
+      parameters:
+        -
+          name: year
+          in: query
+          description: Year for monthly totals
+          required: false
+          schema:
+            type: integer
+            default: 2024
+            example: 2024
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /sales/top-products:
+    get:
+      tags:
+        - Sales
+      summary: Get top selling products
+      description: Retrieve products ordered by sales quantity
+      security:
+        -
+          cookieAuth: []
+      parameters:
+        -
+          name: limit
+          in: query
+          description: Number of products to return
+          required: false
+          schema:
+            type: integer
+            default: 10
+            example: 10
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+        401:
+          description: Unauthenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        500:
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   securitySchemes:
     cookieAuth:
@@ -2191,6 +3019,230 @@ components:
                 maximum: 999999.99
                 example: 10.50
                 description: Purchase price per unit
+    Client:
+      type: object
+      required:
+        - id
+        - name
+        - email
+        - is_active
+      properties:
+        id:
+          type: integer
+          example: 1
+          description: Unique identifier for the client
+        name:
+          type: string
+          example: "John Doe"
+          description: Full name of the client
+        email:
+          type: string
+          format: email
+          example: "john@example.com"
+          description: Client's email address
+        phone:
+          type: string
+          nullable: true
+          example: "+1234567890"
+          description: Client's phone number
+        is_active:
+          type: boolean
+          example: true
+          description: Whether the client is active
+        created_at:
+          type: string
+          format: "date-time"
+          description: Client creation timestamp
+        updated_at:
+          type: string
+          format: "date-time"
+          description: Last update timestamp
+    CreateClientRequest:
+      type: object
+      required:
+        - name
+        - email
+      properties:
+        name:
+          type: string
+          example: "Jane Smith"
+          description: Full name of the client
+        email:
+          type: string
+          format: email
+          example: "jane@example.com"
+          description: Client's email address (unique)
+        phone:
+          type: string
+          example: "+1234567890"
+          description: Client's phone number (optional)
+        is_active:
+          type: boolean
+          example: true
+          description: Whether the client is active (defaults to true)
+    UpdateClientRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Updated Name"
+          description: Full name of the client
+        email:
+          type: string
+          format: email
+          example: "updated@example.com"
+          description: Client's email address (unique)
+        phone:
+          type: string
+          example: "+1234567890"
+          description: Client's phone number
+        is_active:
+          type: boolean
+          example: true
+          description: Whether the client is active
+    Sale:
+      type: object
+      required:
+        - id
+        - client_id
+        - user_id
+        - sale_date
+        - total_amount
+        - status
+      properties:
+        id:
+          type: integer
+          example: 1
+          description: Unique identifier for the sale
+        client_id:
+          type: integer
+          example: 1
+          description: ID of the client who made the purchase
+        user_id:
+          type: integer
+          example: 1
+          description: ID of the user who processed the sale
+        sale_date:
+          type: string
+          format: date
+          example: "2024-01-15"
+          description: Date when the sale was made
+        total_amount:
+          type: number
+          format: float
+          example: 299.99
+          description: Total amount of the sale
+        status:
+          type: string
+          enum:
+            - active
+            - cancelled
+          example: "active"
+          description: Current status of the sale
+        notes:
+          type: string
+          nullable: true
+          example: "Customer requested gift wrapping"
+          description: Additional notes about the sale
+        created_at:
+          type: string
+          format: "date-time"
+          description: Sale creation timestamp
+        updated_at:
+          type: string
+          format: "date-time"
+          description: Last update timestamp
+    SaleDetail:
+      type: object
+      required:
+        - id
+        - sale_id
+        - product_id
+        - quantity
+        - sale_price
+        - subtotal
+      properties:
+        id:
+          type: integer
+          example: 1
+          description: Unique identifier for the sale detail
+        sale_id:
+          type: integer
+          example: 1
+          description: ID of the sale this detail belongs to
+        product_id:
+          type: integer
+          example: 1
+          description: ID of the product sold
+        quantity:
+          type: integer
+          minimum: 1
+          example: 2
+          description: Quantity of the product sold
+        sale_price:
+          type: number
+          format: float
+          example: 149.99
+          description: Price per unit at the time of sale
+        subtotal:
+          type: number
+          format: float
+          example: 299.98
+          description: Subtotal for this product (quantity * sale_price)
+        created_at:
+          type: string
+          format: "date-time"
+          description: Detail creation timestamp
+        updated_at:
+          type: string
+          format: "date-time"
+          description: Last update timestamp
+    CreateSaleRequest:
+      type: object
+      required:
+        - client_id
+        - sale_details
+      properties:
+        client_id:
+          type: integer
+          example: 1
+          description: ID of the client making the purchase
+        sale_date:
+          type: string
+          format: date
+          example: "2024-01-15"
+          description: Date of sale (defaults to today)
+        notes:
+          type: string
+          example: "Customer requested gift wrapping"
+          description: Additional notes about the sale
+        sale_details:
+          type: array
+          minItems: 1
+          description: Array of products being sold
+          items:
+            type: object
+            required:
+              - product_id
+              - quantity
+              - sale_price
+            properties:
+              product_id:
+                type: integer
+                example: 1
+                description: ID of the product to sell
+              quantity:
+                type: integer
+                minimum: 1
+                maximum: 999999
+                example: 2
+                description: Quantity to sell
+              sale_price:
+                type: number
+                minimum: 0.01
+                maximum: 999999.99
+                example: 149.99
+                description: Sale price per unit
 tags:
   -
     name: Authentication
@@ -2207,6 +3259,12 @@ tags:
   -
     name: Purchases
     description: Purchase order management endpoints for administrators to create purchases, manage inventory flow, and track supplier transactions
+  -
+    name: Clients
+    description: Client management endpoints for administrators to manage customer relationships, contact information, and client status
+  -
+    name: Sales
+    description: Sales management endpoints for administrators to create sales, manage inventory flow with automatic stock deduction, and track customer transactions
 externalDocs:
   description: Find more info about this API
   url: "https://github.com/your-repo"
