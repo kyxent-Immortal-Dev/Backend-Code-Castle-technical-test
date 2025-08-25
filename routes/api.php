@@ -36,13 +36,14 @@ Route::middleware(['auth:sanctum', 'auth.errors'])->group(function () {
     
     // Admin-only inventory management routes
     Route::middleware('role:admin')->group(function () {
-        // Products management
-        Route::apiResource('products', ProductController::class);
-        Route::patch('/products/{product}/toggle-status', [ProductController::class, 'toggleStatus']);
+        // Products management - Specific routes first, then resource routes
+        Route::get('/products/stock-report', [ProductController::class, 'generateStockReport']);
         Route::get('/products/low-stock', [ProductController::class, 'lowStock']);
         Route::get('/products/out-of-stock', [ProductController::class, 'outOfStock']);
         Route::get('/products/stats', [ProductController::class, 'stats']);
         Route::get('/products/price-range', [ProductController::class, 'byPriceRange']);
+        Route::apiResource('products', ProductController::class);
+        Route::patch('/products/{product}/toggle-status', [ProductController::class, 'toggleStatus']);
         
         // Suppliers management
         Route::apiResource('suppliers', SupplierController::class);

@@ -8,6 +8,7 @@ use App\Http\Requests\Inventary\Products\UpdateProductRequest;
 use App\Http\Requests\Inventary\Products\SearchProductRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 /**
  * Controlador para el manejo de productos del inventario
@@ -312,6 +313,50 @@ class ProductController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener productos por rango de precios: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Genera un reporte PDF del stock actual.
+     */
+    public function generateStockReport()
+    {
+        try {
+            $products = $this->productRepository->all();
+            
+            // Calcular estadísticas para el reporte
+            $totalProducts = $products->count();
+            $activeProducts = $products->where('is_active', true)->count();
+            $lowStockProducts = $products->where('stock', '>', 0)->where('stock', '<=', 10)->count();
+            $outOfStockProducts = $products->where('stock', '<=', 0)->count();
+
+            $data = [
+                'products' => $products,
+                'totalProducts' => $totalProducts,
+                'activeProducts' => $activeProducts,
+                'lowStockProducts' => $lowStockProducts,
+                'outOfStockProducts' => $outOfStockProducts,
+            ];
+
+            $pdf = Pdf::loadView('pdf.stock-report', $data);
+            
+            // Configurar el PDF
+            $pdf->setPaper('a4', 'portrait');
+            $pdf->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true,
+                'defaultFont' => 'DejaVu Sans'
+            ]);
+
+            $filename = 'reporte-stock-' . now()->format('Y-m-d-H-i-s') . '.pdf';
+            
+            return $pdf->download($filename);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al generar reporte: ' . $e->getMessage()
             ], 500);
         }
     }
