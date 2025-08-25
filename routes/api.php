@@ -73,7 +73,7 @@ Route::middleware(['auth:sanctum', 'auth.errors'])->group(function () {
         Route::get('/clients/search', [ClientController::class, 'search']);
         Route::get('/clients/stats', [ClientController::class, 'stats']);
         
-        // Sales management
+        // Sales management - Specific routes first, then resource routes
         Route::get('/sales/stats', [SaleController::class, 'stats']);
         Route::get('/sales/status/{status}', [SaleController::class, 'byStatus']);
         Route::get('/sales/client/{clientId}', [SaleController::class, 'byClient']);
@@ -81,6 +81,7 @@ Route::middleware(['auth:sanctum', 'auth.errors'])->group(function () {
         Route::get('/sales/date-range', [SaleController::class, 'byDateRange']);
         Route::get('/sales/monthly', [SaleController::class, 'monthlyTotals']);
         Route::get('/sales/top-products', [SaleController::class, 'topProducts']);
+        Route::get('/sales/report', [SaleController::class, 'generateSalesReport']);
         Route::apiResource('sales', SaleController::class)->except(['update', 'destroy']);
         Route::patch('/sales/{sale}/cancel', [SaleController::class, 'cancel']);
     });

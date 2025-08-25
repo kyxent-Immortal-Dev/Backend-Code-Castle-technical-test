@@ -7,6 +7,7 @@ use App\Repositories\Sales\SaleRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SaleController extends Controller
 {
@@ -249,6 +250,65 @@ class SaleController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener totales mensuales: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Genera un reporte PDF de ventas por rango de fechas.
+     */
+    public function generateSalesReport(Request $request)
+    {
+        try {
+            $request->validate([
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after_or_equal:start_date'
+            ]);
+
+            $startDate = $request->start_date;
+            $endDate = $request->end_date;
+            
+            $sales = $this->saleRepository->getSalesByDateRange($startDate, $endDate);
+            
+            // Asegurar que $sales sea siempre una colección
+            if (!$sales) {
+                $sales = collect([]);
+            }
+            
+            // Calcular estadísticas para el reporte
+            $totalSales = $sales->count();
+            $activeSales = $sales->where('status', 'active')->count();
+            $cancelledSales = $sales->where('status', 'cancelled')->count();
+            $totalRevenue = $sales->where('status', 'active')->sum('total_amount');
+
+            $data = [
+                'sales' => $sales,
+                'startDate' => $startDate,
+                'endDate' => $endDate,
+                'totalSales' => $totalSales,
+                'activeSales' => $activeSales,
+                'cancelledSales' => $cancelledSales,
+                'totalRevenue' => $totalRevenue,
+            ];
+
+            $pdf = Pdf::loadView('pdf.sales-report', $data);
+            
+            // Configurar el PDF
+            $pdf->setPaper('a4', 'portrait');
+            $pdf->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true,
+                'defaultFont' => 'DejaVu Sans'
+            ]);
+
+            $filename = 'reporte-ventas-' . $startDate . '-a-' . $endDate . '.pdf';
+            
+            return $pdf->download($filename);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al generar reporte: ' . $e->getMessage()
             ], 500);
         }
     }
