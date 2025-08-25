@@ -54,13 +54,14 @@ Route::middleware(['auth:sanctum', 'auth.errors'])->group(function () {
         Route::get('/suppliers/stats', [SupplierController::class, 'stats']);
         Route::get('/suppliers/search', [SupplierController::class, 'search']);
         
-        // Purchases management
+        // Purchases management - Specific routes first, then resource routes
         Route::get('/purchases/stats', [PurchaseController::class, 'stats']);
         Route::get('/purchases/status/{status}', [PurchaseController::class, 'byStatus']);
         Route::get('/purchases/supplier/{supplierId}', [PurchaseController::class, 'bySupplier']);
         Route::get('/purchases/date-range', [PurchaseController::class, 'byDateRange']);
         Route::get('/purchases/monthly', [PurchaseController::class, 'monthlyTotals']);
         Route::get('/purchases/top-products', [PurchaseController::class, 'topProducts']);
+        Route::get('/purchases/supplier/{supplierId}/report', [PurchaseController::class, 'generatePurchasesBySupplierReport']);
         Route::apiResource('purchases', PurchaseController::class)->except(['update']);
         Route::put('/purchases/{purchase}', [PurchaseController::class, 'update']);
         Route::patch('/purchases/{purchase}/complete', [PurchaseController::class, 'complete']);

@@ -8,6 +8,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Purchase;
+use App\Models\Supplier;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 /**
  * Controlador para el manejo de compras del sistema
@@ -385,6 +387,65 @@ class PurchaseController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Error al obtener productos más comprados: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Genera un reporte PDF de compras por proveedor.
+     */
+    public function generatePurchasesBySupplierReport(int $supplierId)
+    {
+        try {
+            $supplier = Supplier::find($supplierId);
+            
+            if (!$supplier) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Proveedor no encontrado'
+                ], 404);
+            }
+
+            $purchases = $this->purchaseRepository->getBySupplier($supplierId);
+            
+            // Asegurar que $purchases sea siempre una colección
+            if (!$purchases) {
+                $purchases = collect([]);
+            }
+            
+            // Calcular estadísticas para el reporte
+            $totalPurchases = $purchases->count();
+            $pendingPurchases = $purchases->where('status', 'pending')->count();
+            $completedPurchases = $purchases->where('status', 'completed')->count();
+            $totalAmount = $purchases->sum('total_amount');
+
+            $data = [
+                'supplier' => $supplier,
+                'purchases' => $purchases,
+                'totalPurchases' => $totalPurchases,
+                'pendingPurchases' => $pendingPurchases,
+                'completedPurchases' => $completedPurchases,
+                'totalAmount' => $totalAmount,
+            ];
+
+            $pdf = Pdf::loadView('pdf.purchases-by-supplier-report', $data);
+            
+            // Configurar el PDF
+            $pdf->setPaper('a4', 'portrait');
+            $pdf->setOptions([
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled' => true,
+                'defaultFont' => 'DejaVu Sans'
+            ]);
+
+            $filename = 'reporte-compras-proveedor-' . $supplier->name . '-' . now()->format('Y-m-d-H-i-s') . '.pdf';
+            
+            return $pdf->download($filename);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al generar reporte: ' . $e->getMessage()
             ], 500);
         }
     }
