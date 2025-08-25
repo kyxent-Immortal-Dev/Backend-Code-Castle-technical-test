@@ -15,10 +15,10 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         // Create admin user if it doesn't exist
-        if (!User::where('email', 'admin@system.com')->exists()) {
+        if (!User::where('email', 'h.ezequiel.z.campos@codecastle.com')->exists()) {
             User::create([
-                'name' => 'System Administrator',
-                'email' => 'admin@system.com',
+                'name' => 'Humberto Ezequiel Zelaya Campos',
+                'email' => 'h.ezequiel.z.campos@codecastle.com',
                 'password' => Hash::make('admin123'),
                 'role' => 'admin',
                 'is_active' => true,
@@ -26,10 +26,10 @@ class AdminUserSeeder extends Seeder
         }
 
         // Create a sample vendedor user if it doesn't exist
-        if (!User::where('email', 'vendedor@system.com')->exists()) {
+        if (!User::where('email', 'vendedor@codecastle.com')->exists()) {
             User::create([
-                'name' => 'Sample Vendedor',
-                'email' => 'vendedor@system.com',
+                'name' => 'John Doe',
+                'email' => 'vendedor@codecastle.com',
                 'password' => Hash::make('vendedor123'),
                 'role' => 'vendedor',
                 'is_active' => true,

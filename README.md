@@ -7,62 +7,11 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
-## About Laravel
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
-
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
 
 # System Inventory API
 
-A Laravel-based REST API for user management with authentication and role-based access control.
+A comprehensive Laravel-based REST API for inventory management with authentication, sales, and reporting capabilities, built with **Laravel + PostgreSQL**.
 
 ## Features
 
@@ -70,21 +19,29 @@ A Laravel-based REST API for user management with authentication and role-based 
 - **Role-Based Access Control**: Admin and Vendedor roles with different permissions
 - **User Management**: Full CRUD operations for user management (admin only)
 - **User Status Management**: Ability to activate/deactivate users
+- **Inventory Management**: Complete product and supplier management
+- **Purchase Management**: Purchase orders and supplier relationships
+- **Sales Management**: Client management and sales processing
+- **Reporting System**: PDF reports for sales, purchases, and stock
 - **RESTful API**: JSON-based responses for easy frontend integration
-- **Interactive API Documentation**: Swagger/OpenAPI 3.0 documentation with testing interface
+- **Interactive API Documentation**: Swagger/OpenAPI 3.1 documentation with testing interface
+
+## Autor
+- Ezequiel Campos - full stack developer
+- https://github.com/kyxent-Immortal-Dev
 
 ## Requirements
 
 - PHP 8.2+
 - Laravel 12.x
-- MySQL/PostgreSQL/SQLite
+- PostgreSQL
 - Composer
 
 ## Installation
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone https://github.com/kyxent-Immortal-Dev/Backend-Code-Castle-technical-test.git
 cd SystemInventary
 ```
 
@@ -98,14 +55,16 @@ composer install
 cp .env.example .env
 ```
 
-4. Configure your database in `.env`:
+4. Configure your PostgreSQL database in `.env`:
 ```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=system_inventory
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
+DB_CONNECTION=pgsql
+DB_HOST=your-host
+DB_PORT=your-port
+DB_DATABASE=your-database
+DB_USERNAME=postgres
+DB_PASSWORD=your-password
+FRONTEND_URL=tu-frontend:tu-puerto
+SANCTUM_STATEFUL_DOMAINS=tuhost:tupuerto
 ```
 
 5. Generate application key:
@@ -120,7 +79,7 @@ php artisan migrate
 
 7. Seed the database with default users:
 ```bash
-php artisan db:seed --class=AdminUserSeeder
+php artisan db:seed
 ```
 
 8. Start the development server:
@@ -132,8 +91,8 @@ php artisan serve
 
 After running the seeder, you'll have these default accounts:
 
-- **Admin**: `admin@system.com` / `admin123`
-- **Vendedor**: `vendedor@system.com` / `vendedor123`
+- **Admin**: `h.ezequiel.z.campos@codecastle.com` / `admin123`
+- **Vendedor**: `vendedor@codecastle.com` / `vendedor123`
 
 ## API Documentation
 
@@ -156,52 +115,117 @@ Use this for:
 - API client generation
 - CI/CD integration
 
-### Documentation Files
-- **API_DOCUMENTATION.md**: Complete API reference with examples
-- **SWAGGER_USAGE.md**: Detailed guide on using Swagger documentation
-- **README.md**: This file with setup instructions
-
 ## Quick Start
 
 1. **Login to get a token:**
 ```bash
 curl -X POST http://localhost:8000/api/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@system.com","password":"admin123"}'
+  -d '{"email":"h.ezequiel.z.campos@codecastle.com","password":"admin123"}'
 ```
 
-2. **Use the token to access protected endpoints:**
-```bash
-curl -X GET http://localhost:8000/api/users \
-  -H "Authorization: Bearer YOUR_TOKEN_HERE"
-```
 
-3. **Explore the API with Swagger UI:**
+2. **Explore the API with Swagger UI:**
    - Visit `http://localhost:8000/api/documentation`
-   - Click "Authorize" and enter your Bearer token
+   - Click "login with credentials" 
+   - **Admin**: `h.ezequiel.z.campos@codecastle.com` / `admin123`
+   - **Vendedor**: `vendedor@codecastle.com` / `vendedor123`
    - Test any endpoint directly from the browser
+
+
 
 ## Project Structure
 
 ```
 app/
+├── Console/
+│   └── Commands/
+│       ├── DebugSales.php
+│       ├── GenerateApiDocs.php
+│       └── UpdateSwaggerDocs.php
 ├── Http/
 │   ├── Controllers/
-│   │   ├── AuthController.php      # Authentication endpoints
-│   │   ├── UserController.php      # User management endpoints
-│   │   └── SwaggerController.php   # API documentation
+│   │   ├── Controller.php
+│   │   ├── Inventary/
+│   │   │   ├── ProductController.php      # Product management
+│   │   │   ├── PurchaseController.php     # Purchase orders
+│   │   │   └── SupplierController.php     # Supplier management
+│   │   ├── Sales/
+│   │   │   ├── ClientController.php       # Client management
+│   │   │   └── SaleController.php         # Sales processing
+│   │   └── Users/
+│   │       ├── AuthController.php         # Authentication endpoints
+│   │       └── UserController.php         # User management
 │   ├── Middleware/
-│   │   ├── CheckRole.php          # Role-based access control
+│   │   ├── AdminMiddleware.php            # Admin role protection
+│   │   ├── AuthenticatedMiddleware.php    # Authentication check
+│   │   ├── CheckRole.php                  # Role-based access control
 │   │   └── HandleAuthenticationErrors.php # Auth error handling
+│   ├── Requests/
+│   │   ├── Inventary/
+│   │   │   ├── Products/                  # Product validation
+│   │   │   ├── Suppliers/                 # Supplier validation
+│   │   │   └── UpdatePurchaseRequest.php  # Purchase validation
+│   │   ├── Sales/
+│   │   │   ├── Clients/                   # Client validation
+│   │   │   └── Sales/                     # Sales validation
+│   │   └── Users/                         # User validation
 │   └── Repositories/
-│       └── UserRepository.php      # User data operations
+│       ├── Inventary/
+│       │   ├── ProductRepository.php      # Product data operations
+│       │   ├── PurchaseRepository.php     # Purchase data operations
+│       │   └── SupplierRepository.php     # Supplier data operations
+│       ├── Sales/
+│       │   ├── ClientRepository.php       # Client data operations
+│       │   └── SaleRepository.php         # Sales data operations
+│       └── Users/
+│           └── UserRepository.php         # User data operations
 ├── Models/
-│   └── User.php                   # User model with roles
-routes/
-└── api.php                        # API route definitions
-config/
-└── l5-swagger.php                 # Swagger configuration
+│   ├── Client.php                         # Client model
+│   ├── Product.php                        # Product model
+│   ├── Purchase.php                       # Purchase model
+│   ├── PurchaseDetail.php                 # Purchase detail model
+│   ├── Sale.php                           # Sale model
+│   ├── SaleDetail.php                     # Sale detail model
+│   ├── Supplier.php                       # Supplier model
+│   └── User.php                           # User model
+└── Providers/
+    └── AppServiceProvider.php
+
+resources/
+└── views/
+    ├── pdf/                               # PDF report templates
+    │   ├── purchases-by-supplier-report.blade.php
+    │   ├── sales-report.blade.php
+    │   └── stock-report.blade.php
+    ├── swagger-ui.blade.php               # Swagger documentation
+    └── welcome.blade.php                  # Welcome page
 ```
+
+## System Modules
+
+### 🔐 Authentication Module
+- User registration and login
+- Token-based authentication with Sanctum
+- Role-based access control (Admin/Vendedor)
+- Password management and security
+
+### 📦 Inventory Module
+- **Products**: Full CRUD operations for product management
+- **Suppliers**: Supplier information and relationship management
+- **Purchases**: Purchase orders and supplier transactions
+- **Stock Management**: Inventory tracking and stock levels
+
+### 💰 Sales Module
+- **Clients**: Customer information and relationship management
+- **Sales**: Sales processing and order management
+- **Sales Details**: Detailed sales tracking and history
+
+### 📊 Reporting Module
+- **Sales Reports**: PDF generation for sales analytics
+- **Purchase Reports**: Supplier-based purchase analysis
+- **Stock Reports**: Current inventory status and levels
+- **Custom Reports**: Flexible reporting capabilities
 
 ## Security Features
 
@@ -220,24 +244,19 @@ config/
 2. Add routes in `routes/api.php`
 3. Apply appropriate middleware
 4. Update documentation
-5. Regenerate Swagger docs: `php artisan l5-swagger:generate`
+5. Regenerate Swagger docs: `php artisan swagger:update`
 
 ### Swagger Documentation
 
-The API uses OpenAPI 3.0 annotations for automatic documentation generation:
+1. **Explore the API with Swagger UI:**
+   - Visit `http://localhost:8000/api/documentation`
+   - Click "login with credentials" 
+   - **Admin**: `h.ezequiel.z.campos@codecastle.com` / `admin123`
+   - **Vendedor**: `vendedor@codecastle.com` / `vendedor123`
+   - Test any endpoint directly from the browser
 
-```php
-/**
- * @OA\Post(
- *     path="/endpoint",
- *     summary="Endpoint description",
- *     tags={"TagName"},
- *     @OA\RequestBody(...),
- *     @OA\Response(...)
- * )
- */
-public function method(Request $request): JsonResponse
-```
+
+
 
 ### Testing
 
@@ -280,6 +299,10 @@ Error responses:
 - **404**: Not Found
 - **422**: Validation Error
 - **500**: Server Error
+
+## Repository
+
+This project is hosted at: [https://github.com/kyxent-Immortal-Dev/Backend-Code-Castle-technical-test](https://github.com/kyxent-Immortal-Dev/Backend-Code-Castle-technical-test)
 
 ## License
 
