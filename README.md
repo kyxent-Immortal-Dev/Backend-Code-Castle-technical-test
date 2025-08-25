@@ -29,6 +29,7 @@ A comprehensive Laravel-based REST API for inventory management with authenticat
 ## Autor
 - Ezequiel Campos - full stack developer
 - https://github.com/kyxent-Immortal-Dev
+- https://portafolio-ezequiel-campos.netlify.app
 
 ## Requirements
 
