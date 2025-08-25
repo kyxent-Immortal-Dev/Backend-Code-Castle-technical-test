@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers\Inventary;
 
-use App\Repositories\Inventary\PurchaseRepository;
+use App\Http\Controllers\Controller;
 use App\Http\Requests\Inventary\Suppliers\StorePurchaseRequest;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Routing\Controller;
-use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Inventary\UpdatePurchaseRequest;
+use App\Repositories\Inventary\PurchaseRepository;
 use App\Models\Purchase;
 use App\Models\Supplier;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 
 /**
@@ -96,7 +100,7 @@ class PurchaseController extends Controller
     /**
      * Actualiza una compra existente.
      */
-    public function update(StorePurchaseRequest $request, Purchase $purchase): JsonResponse
+    public function update(UpdatePurchaseRequest $request, Purchase $purchase): JsonResponse
     {
         try {
             // Verificar que la compra esté pendiente

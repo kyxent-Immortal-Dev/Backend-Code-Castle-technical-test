@@ -112,8 +112,7 @@ Route::middleware(['auth:sanctum', 'auth.errors'])->group(function () {
     
     // Vendedor routes (if needed in the future)
     Route::middleware('role:vendedor')->group(function () {
-        // Add vendedor-specific routes here
-        // Could include read access to products and basic inventory info
+
     });
 });
 
